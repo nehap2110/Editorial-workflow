@@ -6,7 +6,7 @@ const SALT_ROUNDS = 10;
 
 const register = async (req, res) => {
   try {
-    const { name, email, password } = req.body;
+    const { name, email, password, role } = req.body;
 
     const normalizedEmail = email.toLowerCase().trim();
 
@@ -24,7 +24,10 @@ const register = async (req, res) => {
       name,
       email: normalizedEmail,
       passwordHash,
-      role: "writer", // hardcoded on purpose, see comment above
+      // The role is validated by validateRegister (must be "writer" or
+      // "editor" when provided) and again by the User schema enum. When
+      // the client sends no role, fall back to "writer" as before.
+      role: role ?? "writer",
     });
 
     const token = jwt.sign(

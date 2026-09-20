@@ -42,8 +42,13 @@ export const AuthProvider = ({ children }) => {
     navigate("/dashboard");
   };
 
-  const register = async (name, email, password) => {
-    const response = await api.post("/auth/register", { name, email, password });
+  const register = async (name, email, password, role) => {
+    const response = await api.post("/auth/register", {
+      name,
+      email,
+      password,
+      role,
+    });
     setSession(response.data.token, response.data.user);
     navigate("/dashboard");
   };

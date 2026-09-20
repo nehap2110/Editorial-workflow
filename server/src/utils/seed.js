@@ -3,10 +3,10 @@
  *
  * Run with: npm run seed
  *
- * This exists because public registration always creates a "writer"
- * account (see authController.js), so there is no way to obtain an
- * "editor" account to test role authorization without a trusted,
- * non-public path to create one.
+ * Provides ready-made "editor" and "writer" accounts with known
+ * credentials, so role authorization can be tested without going
+ * through the signup form (see auth.controller.js for how registration
+ * assigns roles).
  *
  * Idempotent: running it multiple times will not create duplicates.
  */

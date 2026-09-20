@@ -1,15 +1,29 @@
-
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { useAuth } from "../context/AuthContext.jsx";
 import FormInput from "../components/FormInput.jsx";
 import Button from "../components/Button.jsx";
 
+// Values must match the backend enum in server/src/models/User.js exactly.
+const ROLE_OPTIONS = [
+  {
+    value: "writer",
+    label: "Writer",
+    description: "Draft articles and submit them for review.",
+  },
+  {
+    value: "editor",
+    label: "Editor",
+    description: "Review, approve and publish articles.",
+  },
+];
+
 const Register = () => {
   const { register } = useAuth();
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [role, setRole] = useState("writer");
   const [error, setError] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -19,7 +33,7 @@ const Register = () => {
     setIsSubmitting(true);
 
     try {
-      await register(name, email, password);
+      await register(name, email, password, role);
     } catch (err) {
       const message =
         err.response?.data?.message ||
@@ -78,15 +92,7 @@ const Register = () => {
               </h2>
 
               <p className="mt-2 text-sm leading-6 text-muted">
-                New accounts are registered as writers.
-              </p>
-            </div>
-
-            {/* Writer Info */}
-            <div className="mb-5 border border-hairline bg-paper px-4 py-3">
-              <p className="text-sm leading-6 text-muted">
-                Your account will be created with the{" "}
-                <span className="font-semibold text-press">Writer</span> role.
+                Choose a role to get started.
               </p>
             </div>
 
@@ -126,6 +132,36 @@ const Register = () => {
                 placeholder="At least 6 characters"
               />
 
+              {/* Role */}
+              <fieldset>
+                <legend className="mb-1.5 block text-[11px] font-semibold uppercase tracking-[0.14em] text-muted">
+                  Role
+                </legend>
+
+                <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                  {ROLE_OPTIONS.map((option) => (
+                    <label key={option.value} className="cursor-pointer">
+                      <input
+                        type="radio"
+                        name="role"
+                        value={option.value}
+                        checked={role === option.value}
+                        onChange={(e) => setRole(e.target.value)}
+                        className="peer sr-only"
+                      />
+                      <div className="h-full border border-hairline bg-white px-3.5 py-3 transition hover:border-muted/60 peer-checked:border-press peer-checked:ring-1 peer-checked:ring-press peer-focus-visible:ring-2 peer-focus-visible:ring-press">
+                        <span className="block text-sm font-semibold text-ink">
+                          {option.label}
+                        </span>
+                        <span className="mt-1 block text-xs leading-5 text-muted">
+                          {option.description}
+                        </span>
+                      </div>
+                    </label>
+                  ))}
+                </div>
+              </fieldset>
+
               <div className="pt-2">
                 <Button type="submit" disabled={isSubmitting}>
                   {isSubmitting ? "Creating account..." : "Create account"}
@@ -158,4 +194,3 @@ const Register = () => {
 };
 
 export default Register;
-
