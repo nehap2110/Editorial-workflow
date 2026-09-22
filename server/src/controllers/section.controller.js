@@ -13,6 +13,13 @@ const createSection = async (req, res, next) => {
       });
     }
 
+    // name/description are trimmed below, so they must be text
+    if (typeof name !== "string" || typeof description !== "string") {
+      return res.status(400).json({
+        message: "Name and description must be text",
+      });
+    }
+
     // Owner must be a valid user
     if (!mongoose.Types.ObjectId.isValid(owner)) {
       return res.status(400).json({
@@ -143,6 +150,16 @@ const updateSection = async (req, res, next) => {
     if (!mongoose.Types.ObjectId.isValid(id)) {
       return res.status(400).json({
         message: "Invalid section ID",
+      });
+    }
+
+    // name/description are trimmed below, so when provided they must be text
+    if (
+      (name !== undefined && typeof name !== "string") ||
+      (description !== undefined && typeof description !== "string")
+    ) {
+      return res.status(400).json({
+        message: "Name and description must be text",
       });
     }
 

@@ -1042,9 +1042,25 @@ const unpublishArticle = async (req, res, next) => {
 // ==========================================
 const getPublishedArticles = async (req, res) => {
   try {
-    const articles = await Article.find({
+    const query = {
       status: "PUBLISHED",
-    })
+    };
+
+    // Writers only see published articles from the sections they are
+    // assigned to (same visibility rule as getArticles, getArticle and
+    // the dashboard). Editors see every published article.
+    if (req.user.role === "writer") {
+      const sections = await Section.find({
+        writers: req.user._id,
+        archived: false,
+      }).select("_id");
+
+      query.section = {
+        $in: sections.map((section) => section._id),
+      };
+    }
+
+    const articles = await Article.find(query)
       .populate("author", "name email")
       .populate("publishedBy", "name email")
       .sort({ publishedAt: -1 });
@@ -2029,10 +2045,3 @@ module.exports = {
 
  
 };
-  
-  
-  
-  
-  
-  
-  

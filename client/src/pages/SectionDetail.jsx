@@ -11,6 +11,11 @@ const [section, setSection] = useState(null);
 const [writers, setWriters] = useState([]);
 const [selectedWriter, setSelectedWriter] = useState("");
 
+const [articles, setArticles] = useState([]);
+const [articlesTotal, setArticlesTotal] = useState(0);
+const [articlesLoading, setArticlesLoading] = useState(true);
+const [articlesError, setArticlesError] = useState("");
+
 const [loading, setLoading] = useState(true);
 const [assigning, setAssigning] = useState(false);
 
@@ -66,9 +71,40 @@ const response = await api.get("/users/writers");
 
 };
 
+// ==========================================
+// FETCH SECTION'S ARTICLES
+// ==========================================
+
+const fetchArticles = async () => {
+try {
+setArticlesLoading(true);
+setArticlesError("");
+
+  const response = await api.get(
+    `/articles?section=${id}&limit=50&sortBy=updatedAt&order=desc`
+  );
+
+  setArticles(response.data.articles || []);
+  setArticlesTotal(
+    response.data.pagination?.total ??
+      (response.data.articles || []).length
+  );
+} catch (err) {
+  console.error("Fetch section articles error:", err);
+
+  setArticlesError(
+    err.response?.data?.message ||
+      "Failed to load articles."
+  );
+} finally {
+  setArticlesLoading(false);
+}
+};
+
 useEffect(() => {
 fetchSection();
 fetchWriters();
+fetchArticles();
 }, [id]);
 
 // ==========================================
@@ -320,6 +356,95 @@ return ( <div className="min-h-screen bg-paper font-sans text-ink antialiased"> 
           </p>
         </div>
       </div>
+    </section>
+
+    {/* ====================================
+        ARTICLES IN THIS SECTION
+    ==================================== */}
+
+    <section className="mt-6 border border-hairline bg-white">
+      <div className="flex items-center justify-between border-b border-hairline px-6 py-5">
+        <div>
+          <p className="text-xs font-semibold uppercase tracking-[0.15em] text-press">
+            Editorial Content
+          </p>
+
+          <h3 className="mt-1 font-serif text-2xl font-semibold">
+            Articles
+          </h3>
+
+          <p className="mt-1 text-sm text-muted">
+            Articles that belong to this section.
+          </p>
+        </div>
+
+        <span className="border border-hairline bg-paper px-3 py-1.5 font-serif text-lg font-semibold">
+          {articlesTotal}
+        </span>
+      </div>
+
+      {articlesError && (
+        <div className="mx-6 mt-5 border-l-4 border-press bg-[#F5E9E6] px-4 py-3 text-sm text-press">
+          {articlesError}
+        </div>
+      )}
+
+      {articlesLoading ? (
+        <div className="px-6 py-14 text-center">
+          <p className="text-sm text-muted">
+            Loading articles...
+          </p>
+        </div>
+      ) : articles.length === 0 ? (
+        !articlesError && (
+          <div className="px-6 py-14 text-center">
+            <p className="text-xs font-semibold uppercase tracking-[0.15em] text-press">
+              No Articles
+            </p>
+
+            <p className="mt-2 text-sm text-muted">
+              No articles have been created in this section yet.
+            </p>
+          </div>
+        )
+      ) : (
+        <div className="divide-y divide-hairline">
+          {articles.map((article) => (
+            <button
+              key={article._id}
+              type="button"
+              onClick={() =>
+                navigate(`/articles/${article._id}`)
+              }
+              className="flex w-full flex-col gap-2 px-6 py-5 text-left transition hover:bg-paper sm:flex-row sm:items-center sm:justify-between"
+            >
+              <div className="min-w-0">
+                <p className="truncate font-serif text-lg font-semibold text-ink">
+                  {article.title}
+                </p>
+
+                <p className="mt-1 text-xs text-muted">
+                  By{" "}
+                  {article.author?.name ||
+                    article.author?.email ||
+                    "Unknown"}
+                </p>
+              </div>
+
+              <span className="shrink-0 self-start border border-hairline bg-paper px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.12em] text-ink sm:self-auto">
+                {article.status}
+              </span>
+            </button>
+          ))}
+
+          {articlesTotal > articles.length && (
+            <p className="px-6 py-4 text-xs text-muted">
+              Showing {articles.length} of {articlesTotal}{" "}
+              articles.
+            </p>
+          )}
+        </div>
+      )}
     </section>
 
     {/* ====================================
