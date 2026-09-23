@@ -18,6 +18,7 @@ import OverdueAlerts from "./pages/OverdueAlerts";
 import SectionManagement from "./pages/SectionManagement";
 import SectionDetail from "./pages/SectionDetail";
 import ScheduledArticles from "./pages/ScheduledArticles.jsx";
+import RevisionEditor from "./pages/RevisionEditor.jsx";
 
 /**
  * Sends unknown routes to a sensible starting point: signed-in users go
@@ -86,6 +87,16 @@ function App() {
             <ProtectedRoute>
              <RoleRoute allowedRoles={["writer","editor"]}>
               <ArticleEditor />
+             </RoleRoute>
+            </ProtectedRoute>
+          }
+     />
+
+     <Route path="/articles/revisions/:revisionId/edit"
+           element={
+            <ProtectedRoute>
+             <RoleRoute allowedRoles={["writer"]}>
+              <RevisionEditor />
              </RoleRoute>
             </ProtectedRoute>
           }

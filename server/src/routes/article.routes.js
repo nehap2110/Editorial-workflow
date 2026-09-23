@@ -15,6 +15,7 @@ const {
   getPublishedArticles,
   unpublishArticle,
   createRevision,
+  getRevision,
   updateRevision,
   submitRevision,
   approveRevision,
@@ -140,6 +141,14 @@ router.get(
 
 
 
+
+// Get single revision — its author, or any editor
+router.get(
+  "/revisions/:revisionId",
+  protect,
+  requireRole("writer", "editor"),
+  getRevision
+);
 
 //update revision
 router.patch(

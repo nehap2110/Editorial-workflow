@@ -1162,6 +1162,41 @@ const createRevision = async (req, res, next) => {
 };
 
 
+//get single revision
+const getRevision = async (req, res, next) => {
+  try {
+    const { revisionId } = req.params;
+
+    const revision = await ArticleRevision.findById(revisionId)
+      .populate("article", "title status")
+      .populate("author", "name email role")
+      .populate("section", "name");
+
+    if (!revision) {
+      return res.status(404).json({
+        message: "Revision not found",
+      });
+    }
+
+    const isAuthor =
+      revision.author._id.toString() === req.user._id.toString();
+
+    // Same visibility rule as an article: its own author, or any editor
+    if (!isAuthor && req.user.role !== "editor") {
+      return res.status(403).json({
+        message:
+          "You are not authorized to view this revision",
+      });
+    }
+
+    return res.status(200).json({
+      revision,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
 //update revision
 const updateRevision = async (req, res, next) => {
   try {
@@ -2028,6 +2063,7 @@ module.exports = {
   publishArticle,
   unpublishArticle,
   createRevision,
+  getRevision,
   updateRevision,
   submitRevision,
   approveRevision,

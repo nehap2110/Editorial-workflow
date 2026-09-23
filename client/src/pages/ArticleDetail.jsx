@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useAuth } from "../context/AuthContext.jsx";
@@ -484,7 +483,7 @@ const ArticleDetail = () => {
             {/* Revision */}
             {user?.role === "writer" &&
               article.status === "PUBLISHED" &&
-              article.author?._id === user?._id && (
+              article.author?._id === user?.id && (
                 <div className="mt-10 border-t border-hairline pt-8">
                   <div className="border border-hairline bg-paper p-6">
                     <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-press">
@@ -535,4 +534,3 @@ const ArticleDetail = () => {
 };
 
 export default ArticleDetail;
-
