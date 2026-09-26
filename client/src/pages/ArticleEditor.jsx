@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import api from "../services/api";
@@ -24,9 +23,38 @@ const ArticleEditor = () => {
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
 
+  const [sections, setSections] = useState([]);
+  const [sectionsLoading, setSectionsLoading] = useState(true);
+  const [sectionsError, setSectionsError] = useState("");
+
   
   // FETCH ARTICLE WHEN EDITING
   
+  // FETCH SECTIONS THIS USER MAY CREATE ARTICLES IN
+  useEffect(() => {
+    const fetchSections = async () => {
+      try {
+        setSectionsLoading(true);
+        setSectionsError("");
+
+        const response = await api.get("/sections");
+
+        setSections(response.data.sections || []);
+      } catch (err) {
+        console.error("Fetch sections error:", err);
+
+        setSectionsError(
+          err.response?.data?.message ||
+            "Failed to load sections."
+        );
+      } finally {
+        setSectionsLoading(false);
+      }
+    };
+
+    fetchSections();
+  }, []);
+
   useEffect(() => {
     if (!isEditing) return;
 
@@ -51,7 +79,7 @@ const ArticleEditor = () => {
         setFormData({
           title: article.title || "",
           summary: article.summary || "",
-          section: article.section || "",
+          section: article.section?._id || article.section || "",
           content: article.content || "",
         });
 
@@ -430,29 +458,36 @@ const ArticleEditor = () => {
                   className="w-full border border-hairline bg-paper px-4 py-3 text-sm text-ink outline-none transition focus:border-press focus:ring-1 focus:ring-press/20"
                 >
                   <option value="">
-                    Select section
+                    {sectionsLoading
+                      ? "Loading sections..."
+                      : "Select section"}
                   </option>
 
-                  <option value="Politics">
-                    Politics
-                  </option>
-
-                  <option value="Culture">
-                    Culture
-                  </option>
-
-                  <option value="Technology">
-                    Technology
-                  </option>
-
-                  <option value="Sports">
-                    Sports
-                  </option>
-
-                  <option value="Business">
-                    Business
-                  </option>
+                  {sections.map((section) => (
+                    <option
+                      key={section._id}
+                      value={section._id}
+                    >
+                      {section.name}
+                    </option>
+                  ))}
                 </select>
+
+                {!sectionsLoading &&
+                  !sectionsError &&
+                  sections.length === 0 && (
+                    <p className="mt-2 text-xs text-muted">
+                      You are not assigned to any section yet.
+                      An editor needs to assign you to a
+                      section before you can create an article.
+                    </p>
+                  )}
+
+                {sectionsError && (
+                  <p className="mt-2 text-xs text-press">
+                    {sectionsError}
+                  </p>
+                )}
               </div>
 
               {/* Summary */}
@@ -639,4 +674,3 @@ const ArticleEditor = () => {
 };
 
 export default ArticleEditor;
-
